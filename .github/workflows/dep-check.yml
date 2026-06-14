@@ -1,0 +1,21 @@
+name: Dependency Drift Check
+
+on:
+  schedule:
+    - cron: '0 1 * * 1'  # 01:00 UTC Monday = 08:00 ICT T2
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run dependency check
+        run: python dep_check.py
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
