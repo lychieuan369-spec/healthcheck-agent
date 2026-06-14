@@ -46,8 +46,8 @@ def get_requirements(repo: str) -> str | None:
 def check_outdated(requirements_txt: str) -> list[dict]:
     with tempfile.TemporaryDirectory() as tmpdir:
         req_file = os.path.join(tmpdir, "requirements.txt")
-        with open(req_file, "w") as f:
-            f.write(requirements_txt)
+        with open(req_file, "w", encoding="utf-8") as f:
+            f.write(requirements_txt.lstrip("﻿"))
 
         # Install packages quietly
         subprocess.run(
