@@ -44,21 +44,39 @@ def get_requirements(repo: str) -> str | None:
 
 
 def check_outdated(requirements_txt: str) -> list[dict]:
+    # Use a fresh, isolated venv per repo so packages from one repo's
+    # requirements.txt never leak into (or get reported for) another repo.
     with tempfile.TemporaryDirectory() as tmpdir:
         req_file = os.path.join(tmpdir, "requirements.txt")
         with open(req_file, "w", encoding="utf-8") as f:
             f.write(requirements_txt.lstrip("﻿"))
 
-        # Install packages quietly
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-r", req_file, "-q",
+        venv_dir = os.path.join(tmpdir, "venv")
+        venv_result = subprocess.run(
+            [sys.executable, "-m", "venv", venv_dir],
+            capture_output=True, timeout=60
+        )
+        if venv_result.returncode != 0:
+            return []
+
+        venv_python = (
+            os.path.join(venv_dir, "Scripts", "python.exe")
+            if os.name == "nt"
+            else os.path.join(venv_dir, "bin", "python")
+        )
+
+        # Install this repo's packages into the isolated venv only
+        install_result = subprocess.run(
+            [venv_python, "-m", "pip", "install", "-r", req_file, "-q",
              "--disable-pip-version-check"],
             capture_output=True, timeout=120
         )
+        if install_result.returncode != 0:
+            return []
 
-        # Check outdated
+        # Check outdated within that same isolated venv
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "list", "--outdated", "--format=json",
+            [venv_python, "-m", "pip", "list", "--outdated", "--format=json",
              "--disable-pip-version-check"],
             capture_output=True, text=True, timeout=30
         )
