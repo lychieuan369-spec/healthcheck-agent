@@ -25,11 +25,15 @@ STATE_FILE = "railway_usage_state.json"
 
 USAGE_QUERY = """
 query WorkspaceUsage($workspaceId: String!) {
-  usage(workspaceId: $workspaceId) {
-    estimatedCost
+  workspace(workspaceId: $workspaceId) {
+    customer {
+      currentUsage
+    }
   }
 }
 """
+
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36"
 
 
 def graphql(query: str, variables: dict) -> dict:
@@ -40,6 +44,7 @@ def graphql(query: str, variables: dict) -> dict:
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {RAILWAY_TOKEN}",
+            "User-Agent": UA,  # Cloudflare chặn user-agent mặc định của urllib
         },
         method="POST",
     )
@@ -91,7 +96,7 @@ def main():
 
     try:
         data = graphql(USAGE_QUERY, {"workspaceId": WORKSPACE_ID})
-        cost = float(data["usage"]["estimatedCost"])
+        cost = float(data["workspace"]["customer"]["currentUsage"])
     except Exception as e:
         print(f"[ERROR] Không lấy được usage: {e}", file=sys.stderr)
         # Báo lỗi qua Telegram để biết script hỏng, không âm thầm im lặng
