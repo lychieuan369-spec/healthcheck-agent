@@ -2,5 +2,9 @@
   "2026-07": {
     "alerted": false,
     "cost_at_alert": 4.180365560442873
+  },
+  "2026-08": {
+    "alerted": false,
+    "cost_at_alert": 4.24436673652281
   }
 }
