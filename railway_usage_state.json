@@ -12,7 +12,7 @@
     "cost_at_alert": 4.622968792096543
   },
   "2026-10": {
-    "alerted": false,
-    "cost_at_alert": 4.96849000938963
+    "alerted": true,
+    "cost_at_alert": 5.017781922664568
   }
 }
